@@ -1,0 +1,31 @@
+name: Build & release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create dist directory
+        run: mkdir ./dist
+      - name: Copy source SVGs
+        run: cp -r studios ./dist/
+      - name: ImageMagick Action
+        uses: jruipinto/ImageMagick-action@v1
+        with:
+          # ImageMagick command to be executed
+          command: mogrify -format png dist/studios/**/*.svg
+      - name: Remove source SVGs
+        run: rm dist/studios/**/*.svg
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false
+          files: |
+            dist/*
